@@ -2,18 +2,28 @@ define({
 	map: true,
 	queries: [
 		{
-			description: 'Find A Public Safety Location By Name',
-			url: 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer',
-			layerIds: [1, 2, 3, 4, 5, 6, 7],
-			searchFields: ['FDNAME, PDNAME', 'NAME', 'RESNAME'],
+			description: 'Find Address',
+			url: 'http://204.49.20.76:6080/arcgis/rest/services/PA_Services/Streets_Address/MapServer',
+			autofill_url:'http://gisvm109/viewer_dev/street_name_lookup.php?',
+			layerIds: [2],
+			searchFields: ['SITE_ADDR'],
 			minChars: 2
 		},
-		{
-			description: 'Find Incident By Code/Description',
-			url: 'http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/PublicSafety/PublicSafetyOperationalLayers/MapServer',
-			layerIds: [15, 17, 18],
-			searchFields: ['FCODE', 'DESCRIPTION'],
-			minChars: 4
+       {
+			description: 'Find Property by Owner',
+			url: 'http://204.49.20.76:6080/arcgis/rest/services/PA_Services/Parcels/MapServer',
+			autofill_url:'http://gisvm109/viewer_dev/owner_lookup.php?',
+			layerIds: [13],
+			searchFields: ['OWNER_NAME'],
+			minChars: 1
+		},
+       {
+			description: 'Find Property by PIN',
+			url: 'http://204.49.20.76:6080/arcgis/rest/services/PA_Services/Parcels/MapServer',
+			autofill_url:'http://gisvm109/viewer_dev/pin_lookup.php?',
+			layerIds: [13],
+			searchFields: ['PIN_DSP'],
+			minChars: 1
 		}
 	]
 });
