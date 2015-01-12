@@ -18,8 +18,9 @@ define([
 	'dojo/topic',
 	'esri/dijit/PopupMobile',
 	'dijit/Menu',
-	'esri/IdentityManager'
-], function (Map, dom, domStyle, domGeom, domClass, on, array, BorderContainer, ContentPane, FloatingTitlePane, lang, mapOverlay, FloatingWidgetDialog, put, aspect, has, topic, PopupMobile, Menu) {
+	'esri/IdentityManager',
+	'../gis/dijit/mapservLayer'
+], function (Map, dom, domStyle, domGeom, domClass, on, array, BorderContainer, ContentPane, FloatingTitlePane, lang, mapOverlay, FloatingWidgetDialog, put, aspect, has, topic, PopupMobile, Menu,MapservLayer) {
 
 	return {
 		legendLayerInfos: [],
@@ -237,17 +238,27 @@ define([
 				tiled: 'ArcGISTiledMapService',
 				wms: 'WMS',
 				wmts: 'WMTS' //untested
+				,mapserv: 'mapservLayer' //untested
 			};
 			// loading all the required modules first ensures the layer order is maintained
 			var modules = [];
 			array.forEach(this.config.operationalLayers, function (layer) {
 				var type = layerTypes[layer.type];
+				//console.log("type: " + type);
 				if (type) {
-					modules.push('esri/layers/' + type + 'Layer');
+					if (type != 'mapservLayer') {
+					   modules.push('esri/layers/' + type + 'Layer');
+				    } else {
+					   modules.push('./js/gis/dijit/' + type + ".js" );
+
+					}
+
+
+
 				} else {
 					this.handleError({
 						source: 'Controller',
-						error: 'Layer type "' + layer.type + '"" isnot supported: '
+						error: 'Layer type "' + layer.type + '"" aint supported: '
 					});
 				}
 			}, this);
@@ -255,7 +266,13 @@ define([
 				array.forEach(this.config.operationalLayers, function (layer) {
 					var type = layerTypes[layer.type];
 					if (type) {
-						require(['esri/layers/' + type + 'Layer'], lang.hitch(this, 'initLayer', layer));
+						//
+					if (type != 'mapservLayer') {
+					   require(['esri/layers/' + type + 'Layer'], lang.hitch(this, 'initLayer', layer));
+				    } else {
+						 require(['./js/gis/dijit/' + type + '.js'], lang.hitch(this, 'initLayer', layer));
+
+					}
 					}
 				}, this);
 				this.map.addLayers(this.layers);
@@ -264,18 +281,27 @@ define([
 		initLayer: function (layer, Layer) {
 			var l = new Layer(layer.url, layer.options);
 			this.layers.unshift(l); //unshift instead of push to keep layer ordering on map intact
+
 			//Legend LayerInfos array
-			this.legendLayerInfos.unshift({ //unshift instead of push to keep layer ordering in legend intact
+			 this.legendLayerInfos.unshift({ //unshift instead of push to keep layer ordering in legend intact
 				layer: l,
 				title: layer.title || null
 			});
+
+
+			if (layer.type === 'mapservLayer') {
+
+
+			}
 			//LayerControl LayerInfos array
+
 			this.layerControlLayerInfos.unshift({ //unshift instead of push to keep layer ordering in LayerControl intact
 				layer: l,
 				type: layer.type,
 				title: layer.title,
 				controlOptions: layer.layerControlLayerInfos
 			});
+
 			if (layer.type === 'feature') {
 				var options = {
 					featureLayer: l
@@ -285,6 +311,7 @@ define([
 				}
 				this.editorLayerInfos.push(options);
 			}
+
 			if (layer.type === 'dynamic' || layer.type === 'feature') {
 				var idOptions = {
 					layer: l,
@@ -540,11 +567,20 @@ define([
 		handleError: function (options) {
 			if (this.config.isDebug) {
 				if (typeof (console) === 'object') {
+
+                     console.log("cmv-app error--------------------------");
+					 console.log(arguments);
+					 console.log(arguments.callee.caller);
+					 console.log(arguments.callee.caller.toString());
+
+
+
 					for (var option in options) {
 						if (options.hasOwnProperty(option)) {
 							console.log(option, options[option]);
 						}
 					}
+					console.log("-------------------------------------");
 				}
 			} else {
 				// add growler here?

@@ -1,16 +1,21 @@
 define([
-    'esri/map',
-	'esri/units',
-	'esri/geometry/Extent',
-	'esri/config',
-	'esri/tasks/GeometryService',
-	'esri/layers/ImageParameters'
+    'esri/map'
+	,'esri/units'
+	,'esri/geometry/Extent'
+	,'esri/config'
+	,'esri/tasks/GeometryService'
+	,'esri/layers/ImageParameters'
+	,'esri/layers/WMSLayer'
+	,'esri/layers/WMSLayerInfo'
+	,"esri/SpatialReference"
 	,'esri/dijit/Basemap'
 	,'esri/dijit/BasemapLayer'
+	,'../gis/dijit/mapservLayer'
+
     //,'esri/layers/ArcGISTiledMapServiceLayer'
     //,'esri/map'
     //,'esri/geometry/Point'
-], function (Map,units, Extent, esriConfig, GeometryService, ImageParameters, Basemap, BasemapLayer ) {
+], function (Map,units, Extent, esriConfig, GeometryService, ImageParameters, WMSLayer,WMSLayerInfo, SpatialReference,Basemap, BasemapLayer,MapservLayer ) {
 
 	// url to your proxy page, must be on same machine hosting you app. See proxy folder for readme.
 	esriConfig.defaults.io.proxyUrl = 'proxy/proxy.ashx';
@@ -18,9 +23,18 @@ define([
 	// url to your geometry server.
 	esriConfig.defaults.geometryService = new GeometryService('http://gisvm101:6080/arcgis/rest/services/Utilities/Geometry/GeometryServer');
 
+   // esri.config.defaults.map.zoomDuration = 100; //time in milliseconds; default is 500
+	//esri.config.defaults.map.zoomRate = 10; //refresh rate of zoom animation; default is 25
+
+    //esri.config.defaults.map.panDuration = 100; //time in milliseconds; default is 500
+	//esri.config.defaults.map.panRate = 10; //refresh rate of zoom animation; default is 25
+
+
 	//image parameters for dynamic services, set to png32 for higher quality exports.
 	var imageParameters = new ImageParameters();
 	imageParameters.format = 'png32';
+
+
 /*
     var webLods = [
             //{ "level" : 0, "resolution" : 156543.033928, "scale" : 591657527.591555 },
@@ -53,10 +67,10 @@ define([
 		defaultMapClickMode: 'identify',
 		// map options, passed to map constructor. see: https://developers.arcgis.com/javascript/jsapi/map-amd.html#map1
 		mapOptions: {
-		    //basemap: 'esri_imagery',
+		     //basemap: 'streets',
 		     // basemap: 'ortho_2013',
 		    // basemap:  new esri.dijit.Basemap({
-			  basemap:  new  Basemap({
+			   basemap:  new  Basemap({
 				id: 'ortho_2013',
 				title: 'ortho_2013',
 				//thumbnailUrl: '../../igis_thumb.png',
@@ -64,7 +78,8 @@ define([
 			}),
 
 			center: [-86.59987, 30.68192],
-			zoom: 10,
+			zoom: 10
+			//,spatialReference: new esri.SpatialReference({ wkid: 102100 })
 			//minZoom:10,
 			//maxZoom:19,
 			//sliderStyle: 'small',
@@ -118,6 +133,7 @@ define([
 				opacity: 0.75,
 				visible: true,
 				imageParameters: imageParameters
+				//spatialReference: new esri.SpatialReference({ wkid: 102100 })
 			},
 			layerControlLayerInfos: {
 				swipe: true,
@@ -128,12 +144,13 @@ define([
 		}
 
 		// WMS and wms layer type is not supported controller.js line 575
-		/*,{
-					type: 'wms',
-					url: 'http://204.49.20.75/ms/cgi/mapserv.exe?map=d:\\inetpub\\wwwroot\\ms6\\data\\pa\\map.map&service=WMS',
+		//new mapservLayer({ wkid: 102100 });
+		 /*,{
+					type: 'mapserv',
+					url: 'http://204.49.20.75/ms/cgi/mapserv.exe?map=d:\\inetpub\\wwwroot\\ms6\\data\\pa\\map.map&service=WMS&request=GetCapabilities&version=1.3.0',
 					title: 'wms_aerial',
-					slider: true,
-					noLegend: false,
+					slider: false,
+					noLegend: true,
 					collapsed: false,
 					options: {
 						id: 'wms_aerial',
@@ -144,7 +161,9 @@ define([
 					layerControlLayerInfos: {
 						swipe: true
 					}
-		}*/
+		}
+		*/
+
 
 		/*,
         {
@@ -438,7 +457,8 @@ define([
 				position: 3,
 				options: 'config/identify'
 			},
-			basemaps: {
+
+			/*basemaps: {
 				include: true,
 				id: 'basemaps',
 				title: 'Basemaps',
@@ -448,6 +468,29 @@ define([
 				srcNodeRef: 'basemapsDijit',
 				options: 'config/basemaps'
 			},
+			*/
+			ModBasemaps: {
+				include: true,
+				id: 'modbasemaps',
+				title: 'ModBasemaps',
+				type: 'domNode',
+				//position: 13,
+				path: 'gis/dijit/ModBasemaps',
+				srcNodeRef: 'basemapsDijit',
+				options: 'config/modbasemaps'
+			},
+			ImageSlider: {
+				include: true,
+				id: 'imageslider',
+				title: 'Image Slider',
+				type: 'domNode',
+				path: 'gis/dijit/ImageSlider',
+				srcNodeRef: 'imagesliderDijit',
+				options: 'config/modbasemaps'
+			},
+
+
+
 			mapInfo: {
 				include: false,
 				id: 'mapInfo',
@@ -630,7 +673,7 @@ define([
 					defaultLayout: 'Letter ANSI A Landscape'
 				}
 			}
-			,PINSearch: {
+			/*,PINSearch: {
 				include: true,
 				id: 'PINSearch',
 				type: 'titlePane',
@@ -640,7 +683,8 @@ define([
 				open: false,
 				position: 7,
 				options: 'config/PINSearch'
-			}/*
+			}*/
+			/*
 			, RelatedRecordTable: {
 				include: true,
 				id: 'RelatedRecordsTable',

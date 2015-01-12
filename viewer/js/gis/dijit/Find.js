@@ -4,6 +4,7 @@ define([
 	'dijit/_TemplatedMixin',
 	'dijit/_WidgetsInTemplateMixin',
 	'dojo/dom-construct',
+	"dojo/dom", "dojo/request", "dojo/json",
 	'dojo/_base/lang',
 	'dojo/_base/array',
 	'dojo/on',
@@ -23,19 +24,23 @@ define([
 	'esri/tasks/FindParameters',
 	'esri/geometry/Extent',
 	'dojo/text!./Find/templates/Find.html',
-	'dojo/i18n!./Find/nls/resource',
-
 	'dijit/form/Form',
+	"dijit/form/TextBox",
+	"dijit/form/Button",
+	"dojo/_base/Color",
 	'dijit/form/FilteringSelect',
 	'dijit/form/ValidationTextBox',
 	'dijit/form/CheckBox',
+	"dijit/Dialog",
+	'dojo/ready', 'dojo/parser', 'dijit/registry',
+    'dojo/store/Cache', 'dojo/store/JsonRest',
 	'xstyle/css!./Find/css/Find.css'
-], function (declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, domConstruct, lang, array, on, keys, Memory, OnDemandGrid, Selection, Keyboard, GraphicsLayer, Graphic, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, graphicsUtils, FindTask, FindParameters, Extent, FindTemplate, i18n) {
+	,"dojo/domReady!"
+], function (declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, domConstruct,dom, request, JSON, lang, array, on, keys, Memory, OnDemandGrid, Selection, Keyboard, GraphicsLayer, Graphic, SimpleRenderer, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, graphicsUtils, FindTask, FindParameters, Extent, FindTemplate,Form, TextBox, Button,Color,FilteringSelect,validationtextBox,checkBox,Dialog,ready,parser,registry,Cache,JsonRest) {
 	return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 		widgetsInTemplate: true,
 		templateString: FindTemplate,
 		baseClass: 'gis_FindDijit',
-		i18n: i18n,
 
 		// Spatial Reference. uses the map's spatial reference if none provided
 		spatialReference: null,
@@ -77,7 +82,10 @@ define([
 					color: [0, 255, 255, 255],
 					width: 3
 				}
-			}
+			},
+		    filteringSelect:null,
+			autofill_urls:null,
+			afStore:null
 		},
 
 		postCreate: function () {
@@ -103,12 +111,25 @@ define([
 				}
 			})));
 
+
+			// do not allow the user to type in the query selection box
+			this.own(on(this.querySelectDijit, 'keyup', lang.hitch(this, function (evt) {
+				 document.getElementById('el_id').focus();
+				 var dialog = new Dialog({
+				             title: "doh!" ,
+				             content: "Please type your query in the textbox below labeled \"Search For Text\"." + "<br />This selectbox is for selecting the type of query you want to run."
+				         });
+                 dialog.show();
+ 			})));
+
+
 			this.queryIdx = 0;
 
 			// add an id so the queries becomes key/value pair store
 			var k = 0, queryLen = this.queries.length;
 			for (k = 0; k < queryLen; k++) {
 				this.queries[k].id = k;
+				//this.autofill_urls[k]=this.queries[k].autofill_url;
 			}
 
 			// add the queries to the drop-down list
@@ -122,9 +143,67 @@ define([
 				this.querySelectDom.style.display = 'none';
 			}
 
-		},
+			 this.setupAutofill();
 
-		createGraphicLayers: function () {
+		}
+		,setupAutofill: function() {
+            //this.inherited(arguments);
+
+			//var afStore = Cache(JsonRest({ target : this.queries[this.queryIdx].autofill_url, idProperty: "id" }), Memory());
+			var testStore = new Memory({data: []});
+
+			ready(function(){
+				this.filteringSelect = new FilteringSelect({
+					id: "el_id",
+					name: "el_id",
+					hasDownArrow: false,
+					value: "",
+					autoComplete: true,
+					pageSize: 10,
+					store: testStore,
+					//store:afStore,
+					searchAttr: "name",
+					disabled:false,
+					required:false,
+					scrollOnFocus:false,
+					queryExpr: "${0}",
+					invalidMessage:"not finding this value but, you can search it anyway",
+					//onKeyUp: function(value){}
+					//,onChange: function(state){}
+			}, "dijit_form_ValidationTextBox_1");
+			});
+
+
+
+		}
+		,setFilterSel:function(obj){
+			//var afStore = Cache(JsonRest({ target : this.queries[this.queryIdx].autofill_url, idProperty: "id" }), Memory());
+			this.afStore = Cache(JsonRest({ target : this.queries[this.queryIdx].autofill_url, idProperty: "id" }), Memory());
+			var testStore = new Memory({data: []});
+
+ 		    if (dijit.byId("el_id")) {
+				 document.getElementById('el_id').focus();
+				 dijit.byId("el_id").set('style', 'width:100%');
+				 dijit.byId("el_id").set('store', testStore);
+				 dijit.byId("el_id").set('value', '');
+				 this.own(on(dijit.byId("el_id"), 'keyup', lang.hitch(this, function (evt) {
+					 /*
+					 if(dojo.byId("el_id").value.length > this.queries[this.queryIdx].minChars )
+					 		dijit.byId("el_id").set("store", Cache(JsonRest({ target : this.queries[this.queryIdx].autofill_url, idProperty: "id" }), Memory()));
+
+					 if(dojo.byId("el_id").value.length <= this.queries[this.queryIdx].minChars )
+							dijit.byId("el_id").set("store", new Memory({data: []}));
+					*/
+				     if(dojo.byId("el_id").value.length > this.queries[this.queryIdx].minChars )
+										 		dijit.byId("el_id").set("store", this.afStore);
+
+					 if(dojo.byId("el_id").value.length <= this.queries[this.queryIdx].minChars )
+							dijit.byId("el_id").set("store",testStore);
+
+			     })));
+		    }
+		}
+		,createGraphicLayers: function () {
 			var pointSymbol = null,
 				polylineSymbol = null,
 				polygonSymbol = null;
@@ -189,6 +268,11 @@ define([
 		search: function () {
 			var query = this.queries[this.queryIdx];
 			var searchText = this.searchTextDijit.get('value');
+
+			if (searchText.length === 0) {
+				searchText=dojo.byId("el_id").value
+			}
+
 			if (!query || !searchText || searchText.length === 0) {
 				return;
 			}
@@ -212,7 +296,7 @@ define([
 			findParams.returnGeometry = true;
 			findParams.layerIds = query.layerIds;
 			findParams.searchFields = query.searchFields;
-			findParams.layerDefinitions = query.layerDefs;
+			findParams.layerDefs = query.layerDefs;
 
 			findParams.searchText = searchText;
 			findParams.contains = !this.containsSearchText.checked;
@@ -221,7 +305,7 @@ define([
 				wkid: this.spatialReference
 			};
 
-			this.findResultsNode.innerHTML = this.i18n.searching;
+			this.findResultsNode.innerHTML = 'Searching...';
 			this.findResultsNode.style.display = 'block';
 
 			var findTask = new FindTask(query.url);
@@ -267,10 +351,8 @@ define([
 			this.results = results;
 
 			if (this.results.length > 0) {
-				//var s = (this.results.length === 1) ? '' : 's';
-				var s = (this.results.length === 1) ? '' : this.i18n.resultsLabel.multipleResultsSuffix;
-				//resultText = this.results.length + ' Result' + s + ' Found';
-				resultText = this.results.length + ' ' + this.i18n.resultsLabel.labelPrefix + s + ' ' + this.i18n.resultsLabel.labelSuffix;
+				var s = (this.results.length === 1) ? '' : 's';
+				resultText = this.results.length + ' Result' + s + ' Found';
 				this.highlightFeatures();
 				this.showResultsGrid();
 			} else {
@@ -389,9 +471,11 @@ define([
 			this.results = null;
 			this.clearResultsGrid();
 			this.clearFeatures();
-			this.searchFormDijit.reset();
-			this.querySelectDijit.setValue(this.queryIdx);
+			//this.searchFormDijit.reset();
+			//this.querySelectDijit.setValue(this.queryIdx);
 			domConstruct.empty(this.findResultsNode);
+
+			dijit.byId("el_id").set('value', '');
 		},
 
 		clearResultsGrid: function () {
@@ -438,6 +522,7 @@ define([
 		_onQueryChange: function (queryIdx) {
 			if (queryIdx >= 0 && queryIdx < this.queries.length) {
 				this.queryIdx = queryIdx;
+				this.setFilterSel(this.queryIdx);
 			}
 		}
 	});

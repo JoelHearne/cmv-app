@@ -2,7 +2,7 @@
    error_reporting(E_ALL);
    ini_set("display_errors", 1);
    $serverName = "GISVM104\GRIZZLY";
-   $connectionInfo = array("UID" => "PA_User", "PWD" => "pa2gisuser", "Database"=>"Central_GIS");
+   $connectionInfo = array("UID" => "[SQL Server User Name]", "PWD" => "[Password]", "Database"=>"[Database Name]");
    $conn = sqlsrv_connect( $serverName, $connectionInfo);
 
 

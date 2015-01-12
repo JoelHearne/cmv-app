@@ -66,7 +66,8 @@ define([
             csv: './LayerControl/controls/CSV',
             georss: './LayerControl/controls/GeoRSS',
             wms: './LayerControl/controls/WMS',
-            kml: './LayerControl/controls/KML'
+            kml: './LayerControl/controls/KML',
+            mapserv: './LayerControl/controls/mapservLayer'
         },
         constructor: function (options) {
             options = options || {};
@@ -119,7 +120,10 @@ define([
                 if (controlOptions && controlOptions.exclude === true) {
                     return;
                 }
+
+                //console.log(layerInfo.type,layerInfo.type);
                 var mod = this._controls[layerInfo.type];
+                //console.log("mod",mod);
                 if (mod) {
                     modules.push(mod);
                 } else {

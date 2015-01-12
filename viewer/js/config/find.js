@@ -24,6 +24,14 @@ define({
 			layerIds: [13],
 			searchFields: ['PIN_DSP'],
 			minChars: 1
+		},
+        {
+			description: 'Find Property by Subdivision',
+			url: 'http://204.49.20.76:6080/arcgis/rest/services/PA_Services/Subdivisions/MapServer',
+			autofill_url:'http://gisvm109/viewer_dev/sub_lookup.php?',
+			layerIds: [3],
+			searchFields: ['PATSUB_SUB_NAME'],
+			minChars: 1
 		}
 	]
 });
