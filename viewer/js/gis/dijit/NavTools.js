@@ -23,7 +23,8 @@ define([
 		  //console.log("navtools postcreate");
           this.navTools = new Navigation(this.map);
           this.own(topic.subscribe('mapClickMode/currentSet', lang.hitch(this, 'setMapClickMode', 'navTools')));
-          this.navTools.on('extent-history-change', lang.hitch(this, 'extentHistoryChangeHandler'));
+          //this.navTools.on('extent-history-change', lang.hitch(this, 'extentHistoryChangeHandler'));
+
           if (this.mapRightClickMenu) {
             this.addRightClickMenu();
             }

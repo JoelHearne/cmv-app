@@ -17,7 +17,7 @@ define([
     'esri/tasks/PrintParameters',
     'esri/request',
     'dojo/i18n!./Print/nls/resource',
-
+    './mapservLayer',
     'dijit/form/Form',
     'dijit/form/FilteringSelect',
     'dijit/form/ValidationTextBox',
@@ -29,7 +29,7 @@ define([
     'dijit/TooltipDialog',
     'dijit/form/RadioButton',
     'xstyle/css!./Print/css/Print.css'
-], function (declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, PrintTask, Memory, lang, array, topic, Style, domConstruct, domClass, printTemplate, printResultTemplate, PrintTemplate, PrintParameters, esriRequest, i18n) {
+], function (declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, PrintTask, Memory, lang, array, topic, Style, domConstruct, domClass, printTemplate, printResultTemplate, PrintTemplate, PrintParameters, esriRequest, i18n,MapservLayer) {
 
     // Main print dijit
     var PrintDijit = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -177,6 +177,9 @@ define([
                     scalebarUnit: layoutForm.scalebarUnit
                 };
                 this.printparams.template = template;
+
+
+                console.log("print this.printparams",this.printparams);
 
                 var fileHandle = this.printTask.execute(this.printparams);
                 var result = new PrintResultDijit({

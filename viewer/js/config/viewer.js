@@ -5,30 +5,34 @@ define([
 	,'esri/config'
 	,'esri/tasks/GeometryService'
 	,'esri/layers/ImageParameters'
-	,'esri/layers/WMSLayer'
-	,'esri/layers/WMSLayerInfo'
+	//,'esri/layers/WMSLayer'
+	//,'esri/layers/WMSLayerInfo'
 	,"esri/SpatialReference"
 	,'esri/dijit/Basemap'
 	,'esri/dijit/BasemapLayer'
 	,'../gis/dijit/mapservLayer'
-
     //,'esri/layers/ArcGISTiledMapServiceLayer'
     //,'esri/map'
     //,'esri/geometry/Point'
-], function (Map,units, Extent, esriConfig, GeometryService, ImageParameters, WMSLayer,WMSLayerInfo, SpatialReference,Basemap, BasemapLayer,MapservLayer ) {
+], function (Map,units, Extent, esriConfig, GeometryService, ImageParameters
+//, WMSLayer,WMSLayerInfo
+,SpatialReference,Basemap, BasemapLayer,MapservLayer ) {
 
 	// url to your proxy page, must be on same machine hosting you app. See proxy folder for readme.
 	esriConfig.defaults.io.proxyUrl = 'proxy/proxy.ashx';
-	esriConfig.defaults.io.alwaysUseProxy = true;
+	esriConfig.defaults.io.alwaysUseProxy = false;
+	esriConfig.defaults.io.corsDetection=true;
+	esriConfig.defaults.io.useCors=true;
+	esriConfig.defaults.io.corsEnabledServers.push("gisvm101");
+
 	// url to your geometry server.
 	esriConfig.defaults.geometryService = new GeometryService('http://gisvm101:6080/arcgis/rest/services/Utilities/Geometry/GeometryServer');
 
-   // esri.config.defaults.map.zoomDuration = 100; //time in milliseconds; default is 500
-	//esri.config.defaults.map.zoomRate = 10; //refresh rate of zoom animation; default is 25
+	esriConfig.defaults.map.panDuration = 1000; // time in milliseconds, default panDuration: 250
 
-    //esri.config.defaults.map.panDuration = 100; //time in milliseconds; default is 500
-	//esri.config.defaults.map.panRate = 10; //refresh rate of zoom animation; default is 25
-
+	esriConfig.defaults.map.panRate = 1; // default panRate: 25
+	esriConfig.defaults.map.zoomDuration = 100; // default zoomDuration: 500
+	esriConfig.defaults.map.zoomRate = 1; // default zoomRate: 25
 
 	//image parameters for dynamic services, set to png32 for higher quality exports.
 	var imageParameters = new ImageParameters();
@@ -65,6 +69,8 @@ define([
 
 		//default mapClick mode, mapClickMode lets widgets know what mode the map is in to avoid multipult map click actions from taking place (ie identify while drawing).
 		defaultMapClickMode: 'identify',
+		mouseWheelSensitivity: 2,
+		panFloatSensitivity: 4, // 1-10
 		// map options, passed to map constructor. see: https://developers.arcgis.com/javascript/jsapi/map-amd.html#map1
 		mapOptions: {
 		     //basemap: 'streets',
@@ -79,6 +85,12 @@ define([
 
 			center: [-86.59987, 30.68192],
 			zoom: 10
+
+			,fadeOnZoom: true
+			,force3DTransforms: true
+			,navigationMode: "css-transforms"
+			,isScrollWheelZoom:true
+
 			//,spatialReference: new esri.SpatialReference({ wkid: 102100 })
 			//minZoom:10,
 			//maxZoom:19,
@@ -130,7 +142,7 @@ define([
 			collapsed: true,
 			options: {
 				id: 'IGIS',
-				opacity: 0.75,
+				opacity: 1,
 				visible: true,
 				imageParameters: imageParameters
 				//spatialReference: new esri.SpatialReference({ wkid: 102100 })
@@ -349,8 +361,9 @@ define([
 				path: 'gis/dijit/Growler',
 				srcNodeRef: 'growlerDijit',
 				options: {}
-			}			 ,
-			InitZoomer : {
+			}
+
+			,InitZoomer : {
 				include: true,
 				id: 'InitZoomer',
 				type: 'invisible',
@@ -379,7 +392,8 @@ define([
 					}
 				}
 			}
-            navtools: {
+
+            ,navtools: {
 				include: true,
 				id: 'navtools',
 				//type: 'titlePane',
@@ -396,7 +410,9 @@ define([
 					mapRightClickMenu: true,
 					mapClickMode: true
 				}
-			},*/
+			}
+*/
+
            ,panpuck: {
 				include: true,
 				id: 'panpuck',
@@ -432,7 +448,7 @@ define([
                  //help: './js/viewer/templates/help/editor.html'
 			   }
             }
-
+/*
             ,userpreferences: {
                 include: true,
                 id: 'userPreferences',
@@ -444,7 +460,7 @@ define([
 				 options: {}
 
             }
-
+*/
 
 
 			,identify: {
@@ -456,7 +472,7 @@ define([
 				open: false,
 				position: 3,
 				options: 'config/identify'
-			},
+			}
 
 			/*basemaps: {
 				include: true,
@@ -469,7 +485,7 @@ define([
 				options: 'config/basemaps'
 			},
 			*/
-			ModBasemaps: {
+		   ,ModBasemaps: {
 				include: true,
 				id: 'modbasemaps',
 				title: 'ModBasemaps',
@@ -478,8 +494,8 @@ define([
 				path: 'gis/dijit/ModBasemaps',
 				srcNodeRef: 'basemapsDijit',
 				options: 'config/modbasemaps'
-			},
-			ImageSlider: {
+			}
+			,ImageSlider: {
 				include: true,
 				id: 'imageslider',
 				title: 'Image Slider',
@@ -487,11 +503,11 @@ define([
 				path: 'gis/dijit/ImageSlider',
 				srcNodeRef: 'imagesliderDijit',
 				options: 'config/modbasemaps'
-			},
+			}
 
 
 
-			mapInfo: {
+			,mapInfo: {
 				include: false,
 				id: 'mapInfo',
 				type: 'domNode',
@@ -519,8 +535,8 @@ define([
 					scalebarStyle: 'line',
 					scalebarUnit: 'dual'
 				}
-			},
-		    locateButton: {
+			}
+		   , locateButton: {
 				include: true,
 				id: 'locateButton',
 				type: 'domNode',
@@ -537,8 +553,8 @@ define([
 						enableHighAccuracy: true
 					}
 				}
-			},
-			overviewMap: {
+			}
+		 	,overviewMap: {
 				include: true,
 				id: 'overviewMap',
 				type: 'map',
@@ -553,8 +569,8 @@ define([
 					visible: false
 					// ,baseLayer:"ortho_2013"
 				}
-			},
-			 homeButton: {
+			}
+			, homeButton: {
 				include: true,
 				id: 'homeButton',
 				type: 'domNode',
@@ -563,17 +579,17 @@ define([
 				options: {
 					map: true,
 					extent: new Extent({
-						xmin: -180,
-						ymin: -85,
-						xmax: 180,
-						ymax: 85,
+						xmin: -86.8043,
+						ymin: 30.3832,
+						xmax: -86.3817,
+						ymax: 31.0047 ,
 						spatialReference: {
 							wkid: 4326
 						}
 					})
 				}
-			},
-			legend: {
+			}
+			,legend: {
 				include: true,
 				id: 'legend',
 				type: 'titlePane',
@@ -585,8 +601,8 @@ define([
 					map: true,
 					legendLayerInfos: true
 				}
-			},
-			layerControl: {
+			}
+			,layerControl: {
 				include: true,
 				id: 'layerControl',
 				type: 'titlePane',
@@ -601,8 +617,8 @@ define([
 					vectorReorder: true,
 					overlayReorder: true
 				}
-			},
-			bookmarks: {
+			}
+			,bookmarks: {
 				include: true,
 				id: 'bookmarks',
 				type: 'titlePane',
@@ -611,8 +627,8 @@ define([
 				open: false,
 				position: 2,
 				options: 'config/bookmarks'
-			},
-			find: {
+			}
+			,find: {
 				include: true,
 				id: 'find',
 				type: 'titlePane',
@@ -622,8 +638,8 @@ define([
 				open: false,
 				position: 3,
 				options: 'config/find'
-			},
-			draw: {
+			}
+		,draw: {
 				include: true,
 				id: 'draw',
 				type: 'titlePane',
@@ -636,8 +652,8 @@ define([
 					map: true,
 					mapClickMode: true
 				}
-			},
-			measure: {
+			}
+			,measure: {
 				include: true,
 				id: 'measurement',
 				type: 'titlePane',
@@ -652,8 +668,8 @@ define([
 					defaultAreaUnit: units.SQUARE_MILES,
 					defaultLengthUnit: units.MILES
 				}
-			},
-			print: {
+			}
+			,print: {
 				include: true,
 				id: 'print',
 				type: 'titlePane',
@@ -699,7 +715,7 @@ define([
 			*/
 
 
-			/*,directions: {
+			,directions: {
 				include: false,
 				id: 'directions',
 				type: 'titlePane',
@@ -718,8 +734,8 @@ define([
 						}
 					}
 				}
-			}*/
-			/*  ,editor: {
+			}
+			  ,editor: {
 				include: true,
 				id: 'editor',
 				type: 'titlePane',
@@ -746,7 +762,7 @@ define([
 					}
 				}
 			}
-*/
+
 			,streetview: {
 				include: true,
 				id: 'streetview',
@@ -761,8 +777,8 @@ define([
 					openOnStartup: true,
 					mapRightClickMenu: true
 				}
-			},
-			help: {
+			}
+			,help: {
 				include: true,
 				id: 'help',
 				type: 'floating',
@@ -771,7 +787,7 @@ define([
 				options: {}
 			}
 
-			, load_indicator : {
+			 , load_indicator : {
 							include: true,
 							id: 'load_indicator',
 							type: 'invisible',

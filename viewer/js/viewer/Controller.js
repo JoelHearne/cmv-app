@@ -4,6 +4,7 @@ define([
 	'dojo/dom-style',
 	'dojo/dom-geometry',
 	'dojo/dom-class',
+	"dojo/dom-construct",
 	'dojo/on',
 	'dojo/_base/array',
 	'dijit/layout/BorderContainer',
@@ -17,10 +18,15 @@ define([
 	'dojo/has',
 	'dojo/topic',
 	'esri/dijit/PopupMobile',
+	"esri/dijit/InfoWindow",
 	'dijit/Menu',
-	'esri/IdentityManager',
-	'../gis/dijit/mapservLayer'
-], function (Map, dom, domStyle, domGeom, domClass, on, array, BorderContainer, ContentPane, FloatingTitlePane, lang, mapOverlay, FloatingWidgetDialog, put, aspect, has, topic, PopupMobile, Menu,MapservLayer) {
+	'esri/IdentityManager'
+    ,'esri/geometry/Point'
+    ,'esri/geometry/Extent'
+
+
+	,'../gis/dijit/mapservLayer'
+], function (Map, dom, domStyle, domGeom, domClass,domConstruct , on, array, BorderContainer, ContentPane, FloatingTitlePane, lang, mapOverlay, FloatingWidgetDialog, put, aspect, has, topic, PopupMobile, InfoWindow,Menu,IdentityManager,Point,Extent,MapservLayer) {
 
 	return {
 		legendLayerInfos: [],
@@ -204,6 +210,10 @@ define([
 			if (has('phone') && !this.config.mapOptions.infoWindow) {
 				this.config.mapOptions.infoWindow = new PopupMobile(null, put('div'));
 			}
+
+
+            //this.config.mapOptions.infoWindow = new InfoWindow({}, domConstruct.create("div")).startup();
+
 			this.map = new Map('mapCenter', this.config.mapOptions);
 			if (this.config.mapOptions.basemap) {
 				this.map.on('load', lang.hitch(this, 'initLayers'));
@@ -217,12 +227,165 @@ define([
 			}
 		},
 		initLayers: function () {
+
 			this.map.on('resize', function (evt) {
 				var pnt = evt.target.extent.getCenter();
 				setTimeout(function () {
 					evt.target.centerAt(pnt);
 				}, 100);
 			});
+
+
+			///////////////////////////////////////////////////////////////////
+			// This hack is my attempt to make JSAPI mousewheel zoom behave like OpenLayers
+			//   OpenLayers is way more responsive than JSAPI
+
+            var _this=this;
+
+			this.map.on('mouse-wheel', function (evt) {
+				 if (evt.detail > 0) {
+                    _this.map.setZoom(_this.map.getZoom()+_this.config.mouseWheelSensitivity)
+				 } else if (evt.detail < 0) {
+                    _this.map.setZoom(_this.map.getZoom()-_this.config.mouseWheelSensitivity)
+				 }
+			});
+
+			///////////////////////////////////////////////////////////////////
+			// This hack is my attempt to make JSAPI pan have momentum like OpenLayers
+/*
+            var dragStartTime=null;
+            var dragStartPoint=[];
+            var dragRate=0;
+            var panGeoStartPoint=null;
+            var isDragged=0;
+
+			this.map.on('mouse-drag-end', function (evt) {
+				 var ms=new Date() - dragStartTime;
+				 var dist=Math.sqrt(Math.pow((evt.clientX - dragStartPoint[0]),2) - Math.pow((evt.clientY - dragStartPoint[1]),2));
+				 dragRate=dist/ms;
+				 isDragged=1;
+			});
+
+			this.map.on('mouse-drag-start', function (evt) {
+				 dragStartTime=new Date();
+				 dragStartPoint[0]=evt.clientX;
+				 dragStartPoint[1]=evt.clientY;
+				 isDragged=1;
+			});
+
+
+			this.map.on('pan-end', function (evt) {
+				  //console.log('pan-end',evt);
+
+			   if (isDragged==1) {
+				  var panGeoEndPoint=_this.map.extent.getCenter();
+				  var dX=panGeoStartPoint.x - panGeoEndPoint.x;
+				  var dY=panGeoStartPoint.y - panGeoEndPoint.y;
+				  var slope=dY/dX;
+				  var yInt=panGeoEndPoint.y - (slope * panGeoEndPoint.x);
+				  var ofsetFactor=((_this.map.extent.xmax - _this.map.extent.xmin)/ (10 - _this.config.panFloatSensitivity)) * (dragRate  );
+
+				  // extrapolate a new point based on dragRate
+				  var nX=0 ;
+				  if (dX <0) {
+					  nX=(panGeoEndPoint.x  + ofsetFactor) ;
+				  } else {
+					  nX=(panGeoEndPoint.x  - ofsetFactor) ;
+				  }
+
+				  var nY=(nX * slope) + yInt ;
+				  var oX=nX-panGeoEndPoint.x;
+				  var oY=nY-panGeoEndPoint.y;
+
+                  if (nX && nY) {
+				     var newPt=new Point(nX,nY, _this.map.spatialReference);
+					 _this.map.centerAt(newPt);
+				   }
+				   isDragged=0;
+               }
+			});
+
+			this.map.on('pan-start', function (evt) {
+				  panGeoStartPoint=_this.map.extent.getCenter();
+			});
+
+*/
+
+			// TODO: Add handler for map unload event to prevent memory leaks
+
+
+			///////////////////////////////////////////////////////////////////
+			// Placeholders for map events
+
+			/*
+			this.map.on('extent-change', function (evt) {
+				 console.log('extent-change',evt);
+			});
+
+			this.map.on('key-down', function (evt) {
+				 console.log('key-down',evt);
+			});
+
+			this.map.on('key-up', function (evt) {
+				 console.log('key-up',evt);
+			});
+
+			this.map.on('mouse-down', function (evt) {
+				 console.log('mouse-down',evt);
+			});
+
+			this.map.on('mouse-up', function (evt) {
+				 console.log('mouse-up',evt);
+			});
+
+
+			this.map.on('mouse-drag', function (evt) {
+				 console.log('mouse-drag',evt);
+			});
+
+			this.map.on('mouse-drag-end', function (evt) {
+				 console.log('mouse-drag-end',evt);
+			});
+
+			this.map.on('mouse-drag-start', function (evt) {
+				 console.log('mouse-drag-start',evt);
+			});
+
+			this.map.on('mouse-drag', function (evt) {
+				// console.log('mouse-drag',evt);
+			});
+			*/
+
+
+            /*
+			this.map.on('unload', function (evt) {
+				 console.log('unload',evt);
+			});
+
+			this.map.on('update-start', function (evt) {
+				 console.log('update-start',evt);
+			});
+
+			this.map.on('zoom', function (evt) {
+				 console.log('zoom',evt);
+			});
+			this.map.on('zoom-start', function (evt) {
+				 console.log('zoom-start',evt);
+			});
+			this.map.on('zoom-end', function (evt) {
+				 console.log('zoom-end',evt);
+			});
+
+			this.map.on('pan', function (evt) {
+				 console.log('pan',evt);
+			});
+
+			*/
+
+
+
+            ///////////////////////////////////////////////////////////////////
+
 
 			this.layers = [];
 			var layerTypes = {
