@@ -107,12 +107,12 @@ define([
 
 			// listen for request to toggle basemap
 			topic.subscribe('ModBasemaps/setCurrentBasemap', function (r) {
-				console.log("ModBasemaps/setCurrentBasemap",r);
+				//console.log("ModBasemaps/setCurrentBasemap",r);
 				_this.autoCheckDropdownItem(r.activeBasemap.title) ;
 			});
         }
         ,autoCheckDropdownItem:function(bm_title) {
-			console.log("autoCheckDropdownItem",bm_title,this.activeBasemap);
+			//console.log("autoCheckDropdownItem",bm_title,this.activeBasemap);
 	       var _this=this;
            var ch = this.menu.getChildren();
            array.forEach(ch, function (c) {
@@ -129,7 +129,7 @@ define([
                  }
 			  }
           });
-          console.log(" finished autoCheckDropdownItem",bm_title,this.activeBasemap);
+          //console.log(" finished autoCheckDropdownItem",bm_title,this.activeBasemap);
 		}
         ,checkbasemapextent:function(ext,basemapid){
             var isIn=true;
@@ -144,10 +144,9 @@ define([
 		}
         ,updateLocation:  function(evt) {
 
-		  console.log("updateLocation",evt,"  this.activeBasemap",this.activeBasemap);
+		  //console.log("updateLocation",evt,"  this.activeBasemap",this.activeBasemap);
 
-		  //TODO: Handle scenario where the current basemap is no longer in the extent view
-		  var isBMOutOfBounds=false;
+		  var isBMOutOfBounds=false; // Handle scenario where the current basemap is no longer in the extent view
 
 
 		  var extnt=evt.extent;
@@ -229,12 +228,7 @@ define([
             // change the basemap to the next available timeslot if current basemap is out of bounds
             if (isBMOutOfBounds) {
 
-
-
 				var diffdate=new Date(this.basemaps[this.activeBasemap].ms_date);
-
-				console.log("@@@@ outof bound s   diffdate",diffdate,"this.availableWMSBasemaps",this.availableWMSBasemaps);
-
 
                 var arr=[];
 				array.forEach(this.availableWMSBasemaps, function (basemap) {
@@ -250,8 +244,6 @@ define([
 					return a-b;
                 });
 
-                console.log("@@@@arr 2",arr);
-
                 // sort by distance from current basemap date
 				arr.sort(function(a, b) {
 					var distancea = Math.abs(diffdate - a);
@@ -260,29 +252,21 @@ define([
 				});
 
 
-               var afterdates=arr.filter(function(d) {
+                var afterdates=arr.filter(function(d) {
                    return d - diffdate > 0;
-               });
-              //  console.log("@@@@arr 4",arr);
-              // console.log("@@@@afterdates",afterdates);
+                });
 
-               // get the basemap with date of afterdates[0]
-             var newActvBM=null;
-             array.forEach(this.availableWMSBasemaps, function (basemap) {
-                  var bmdate=new Date(basemap.ms_date);
-                  if (bmdate.valueOf()==afterdates[0].valueOf()){
-					  //this.activeBasemap=basemap;
-				 	  newActvBM=basemap;
-				   }
-             }, this);
+                // get the basemap with date of afterdates[0]
+				 var newActvBM=null;
+				 array.forEach(this.availableWMSBasemaps, function (basemap) {
+					  var bmdate=new Date(basemap.ms_date);
+					  if (bmdate.valueOf()==afterdates[0].valueOf()){
+						  //this.activeBasemap=basemap;
+						  newActvBM=basemap;
+					   }
+				 }, this);
 
-            // console.log("updateLocation newActvBM ",newActvBM);
-
-            if (newActvBM !=null)  this.activeBasemap=newActvBM.basemap.id;
-
-		  console.log("updateLocation basemap out of bounds changing to ",newActvBM,this.activeBasemap,this.basemaps[this.activeBasemap].title);
-
-
+              if (newActvBM !=null)  this.activeBasemap=newActvBM.basemap.id;
 
 			}
 
@@ -380,7 +364,7 @@ define([
 		}
         ,toggleCustomBasemap : function(bm,bm_id){
 		   this.activeBasemap=bm_id;
-		   console.log("toggleCustomBasemap",bm,bm_id);
+		   //console.log("toggleCustomBasemap",bm,bm_id);
 
            this.hideBaseMap();
             var mslyr=new MapservLayer({
@@ -401,7 +385,7 @@ define([
 
 		},
 		toggleAGSBasemap: function(bm_id){
-			 console.log("toggleAGSBasemap",bm_id);
+			// console.log("toggleAGSBasemap",bm_id);
 
 			 this.activeBasemap=bm_id;
 
@@ -446,7 +430,7 @@ define([
         startup: function () {
            this.inherited(arguments);
            this.activeBasemap=this.mapStartBasemap;
-           console.log("startup",this.activeBasemap);
+           //console.log("startup",this.activeBasemap);
 
            if (this.mode === 'custom') {
                 if (this.map.getBasemap() !== this.mapStartBasemap) { //based off the title of custom basemaps in viewer.js config

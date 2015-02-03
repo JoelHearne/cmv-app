@@ -17,7 +17,8 @@ define([
     'esri/units',
     'dojox/lang/functional',
     'dojo/topic',
-    'dojo/text!./UserPreferences/templates/UserPreferences.html'
+    'dojo/text!./UserPreferences/templates/UserPreferences.html',
+     'xstyle/css!./UserPreferences/css/UserPreferences.css'
 ], function(
     declare,
     _WidgetBase,
@@ -40,7 +41,7 @@ define([
     UserPreferencesTemplate) {
 
     //anonymous function to load CSS files required for this module
-    (function() {
+ /*   (function() {
         var css = [require.toUrl("gis/dijit/UserPreferences/css/UserPreferences.css")];
         var head = document.getElementsByTagName("head").item(0),
             link;
@@ -52,17 +53,23 @@ define([
             head.appendChild(link);
         }
     }());
+    */
 
     // main UserPreferences dijit
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         widgetsInTemplate: true,
         templateString: UserPreferencesTemplate,
-        map: null,
+        //map: null,
         hasCookie: false,
         isBrowser: true,
         mapLayers: {},
+        userPreferenceDefaults:null,
+        userPreferences:null,
+        cookieObj:null,
         postCreate: function() {
             this.inherited(arguments);
+
+            console.log("user preferences postCreate",this);
 
             // Set the number of decimal places to use for the precision of the map extent
             if (this.map) {
@@ -84,12 +91,44 @@ define([
         startup: function() {
             this.inherited(arguments);
 
+            console.log("user preferences startup",this);
 
             // Subscribe to the userPreferences topic for messages from other widgets
             // that a user preference needs to be updated (e.g. WelWhatDisHelpAbout, TOC, Basemaps).
             topic.subscribe('USER_PREFERENCES', lang.hitch(this, function(e) {
+                console.log("topic.subscribe('USER_PREFERENCES'",e);
                 this._updateUserPreferences(e);
             }));
+
+            this.userPreferenceDefaults= {
+			            showWelcome: true
+			            ,showStartupMetrics: true
+			            //,showMapTips: true
+			            //,showMouseoverHighlight: true
+			            ,showCoordinates: true
+			            //,showScale: true
+			            //,restoreMapExtent: true
+			            //,restoreMapLayers: true
+            };
+
+
+            //this.userPreferences = this.userPreferenceDefaults;
+
+            // Get the saved user preferences from the cookie
+            this.cookieObj = cookie('userPreferences');
+            if (this.cookieObj === undefined) {
+                this.cookieObj = this.userPreferenceDefaults;
+            } else {
+                this.cookieObj = JSON.parse(this.cookieObj);
+                this.userPreferences =this.cookieObj;
+                this.hasCookie=true;
+            }
+
+            console.log("cookieObj",this.cookieObj);
+            console.log("this.userPreferences",this.userPreferences);
+            console.log("this.userPreferenceDefaults",this.userPreferenceDefaults);
+
+
 
             // Turn on listeners for map extent changes (if this preference is truthy)
           /*  if (window.userPreferences.restoreMapExtent) {
@@ -124,14 +163,15 @@ define([
             // The user preferences cookie is read by, and the initial user preferences are applied by controller.js on startup.
 
             // Create the checkboxes
-            /*
+
             var checkBox, style, checked;
             var mobileHideOptions = ['showMapTips', 'showMouseoverHighlight', 'showStartupMetrics'];
-            array.forEach(functional.keys(window.userPreferences), lang.hitch(this, function (key) {
+
+            array.forEach(functional.keys(this.userPreferences), lang.hitch(this, function (key) {
                 // Don't show the 'showMapTips' or 'showMouseoverHighlight' checkboxes for mobile devices (touch screens)
                 if (this.isBrowser || (array.indexOf(mobileHideOptions, key) !== -1)) {
                     style = 'block';
-                    checked = window.userPreferences[key];
+                    checked = this.userPreferences[key];
                 } else {
                     style = 'none';
                     checked = false;
@@ -140,7 +180,8 @@ define([
                 domConstruct.create('tr', {
                     'class': 'userPreference',
                     style: 'display: ' + style + ';',
-                    innerHTML: '<td class="userPreferenceLabel">Label for ' + key + '</td><td><input id="' + key + '" type="checkbox"/></td>'}, dom.byId('tbody'), 'last');
+                    innerHTML: '<td class="userPreferenceLabel">' + key + '</td><td><input id="' + key + '" type="checkbox"/></td>'}, dom.byId('tbody'), 'last');
+
                 checkBox = new CheckBox({
                     id: key,
                     name: key,
@@ -149,8 +190,9 @@ define([
                     onChange: lang.hitch(this, function(evt) { this._chkChangeHandler(evt, key); } )
                 }, key);
                 checkBox.startup();
+
             }));
-            */
+
 
         },
         _chkChangeHandler: function(evt, prefName) {
@@ -194,12 +236,14 @@ define([
                     topic.publish('APPLY_USER_PREFERENCES', prefName);
                     break;
             }
-            this._writeCookie();
+
             */
+            this._writeCookie();
         },
         _updateUserPreferences: function(objPref) {
             // When a user preference is set anywhere else in the app,
             // this function synchronizes this widget to the new setting.
+            console.log("_updateUserPreferences",objPref,functional.keys(objPref)[0]);
             /*
             var prefName = functional.keys(objPref)[0];
             if (prefName === 'restoreMapLayers') {
@@ -207,8 +251,9 @@ define([
             } else {
                 lang.mixin(window.userPreferences, objPref);
             }
-            this._writeCookie();
+
             */
+            this._writeCookie();
         },
         _addMapExtentChangeListeners: function() {
             if (!this._zoomEndHandler) {
@@ -244,11 +289,11 @@ define([
             */
         },
         _writeCookie: function() {
-			/*
-            cookie('userPreferences', JSON.stringify(window.userPreferences), {
+
+            cookie('userPreferences', JSON.stringify(this.cookieObj), {
                 expires: 99999
             });
-            */
+
         },
         restoreOpLayerSettings: function(opLayers) {
 		 /*

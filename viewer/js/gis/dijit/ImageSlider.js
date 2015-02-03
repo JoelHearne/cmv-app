@@ -92,7 +92,7 @@ define([
             });
         }
         ,updateSliderIndex: function(bm){
-          console.log("updateSliderIndex",bm);
+          //console.log("updateSliderIndex",bm);
           this.disableChangeBasemap=true;  // we want to suppress changebasemap from publishing request to modbasemaps
           var newidx=-1;
 
@@ -106,11 +106,13 @@ define([
              }, this);
 
             if (newidx !=-1) this.timeSlider.setThumbIndexes([newidx]);
+
+            dom.byId("imgInfo").innerHTML =  bm.title  ;
 			this.disableChangeBasemap=false;
 	    }
         ,updateRanges: function () {  // updates the date ranges for image datasets that are within the visual map extent
 
-            console.log("updateRanges  this.activeBasemap",this.activeBasemap);
+            //console.log("updateRanges  this.activeBasemap",this.activeBasemap);
 
             connect.disconnect(this.ts_ocbm_event);
             ///////////////////////////////////////////////////////////////////////////////////
@@ -164,14 +166,9 @@ define([
 
         ,changeBasemap: function (evt) {  // changes the basemap to the selected image dataset
 
-            console.log("changeBasemap",evt," this.disableChangeBasemap",this.disableChangeBasemap);
+            //console.log("changeBasemap",evt," this.disableChangeBasemap",this.disableChangeBasemap);
 
             if (!this.disableChangeBasemap) {
-            // update the label
-            /*
-            var yrStr  = evt.endTime.getUTCFullYear();
-            dom.byId("daterange").innerHTML = "<i> " + yrStr  + "<\/i>";
-            */
 
             ///////////////////////////////////////////////////////////////////////////////////
             // Change the basemap to reflect the currently selected year.
@@ -193,6 +190,13 @@ define([
 			}
 
 			 console.log("changeBasemap set basemap newActvBM",newActvBM);
+
+
+            // update the label
+
+            //dom.byId("daterange").innerHTML = "<i> " + newActvBM.title  + "<\/i>";
+            dom.byId("imgInfo").innerHTML = newActvBM.title  ;
+
 
             var _this=this;
             // send a message to mod basemaps to show the selected basemap

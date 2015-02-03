@@ -5,11 +5,12 @@ body, html {
     padding: 0;
     overflow: hidden;
     /*font-family: Tahoma;*/
-    font-size: 14px;
+    font-family: Papyrus,Pristina,Vivaldi,Gigi,Gabriola,Chiller,Broadway, Batang,Calibri,Verdana, sans-serif;
+    font-size: 11px;
 }
 .appHeader {
     background: url("../images/linen.jpg") repeat-x scroll left top transparent;
-    height: 70px;
+    height: 40px;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -24,6 +25,7 @@ body, html {
     color: #FFFFFF;
     float: left;
     font-size: 16pt;
+    font-family: Papyrus,Pristina,Vivaldi,Gigi,Gabriola,Chiller,Broadway, Batang,Calibri,Verdana, sans-serif;
     font-weight: bold;
     left: 60px;
     top: 15px;
@@ -38,22 +40,23 @@ body, html {
     float: left;
     left: 80px;
     position: relative;
-    top: 18px;
+    top: -8px;
 }
 .appHeader .headerLinks {
     float: right;
     color: #FFFFFF;
     position: relative;
-    top: 27px;
+    top: 17px;
     right: 10px;
     text-align: right;
+    font-family: Papyrus,Pristina,Vivaldi,Gigi,Gabriola,Chiller,Broadway, Batang,Calibri,Verdana, sans-serif;
 }
 .appHeader .headerLinks a {
     color: #FFFFFF;
 }
 #borderContainerOuter {
     position: absolute;
-    top: 70px;
+    top: 40px;
     bottom: 0;
     left: 0;
     right: 0;

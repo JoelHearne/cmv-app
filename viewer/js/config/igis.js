@@ -141,7 +141,7 @@ define([
         {
 			type: 'dynamic',
 			url: 'http://gisvm101:6080/arcgis/rest/services/IGIS/MapServer',
-			title: 'Interal GIS',
+			title: 'IGIS',
 			slider: true,
 			noLegend: false,
 			collapsed: true,
@@ -411,7 +411,7 @@ define([
 					}
 				}
 			}
-
+*/
             ,navtools: {
 				include: true,
 				id: 'navtools',
@@ -430,7 +430,7 @@ define([
 					mapClickMode: true
 				}
 			}
-*/
+
 
            ,panpuck: {
 				include: true,
@@ -448,7 +448,7 @@ define([
 					map: true
 				}
 			}
-/*
+
              ,share: {
                 include: true,
                 title: "Share the Map",
@@ -467,7 +467,6 @@ define([
                  //help: './js/viewer/templates/help/editor.html'
 			   }
             }
-*/
 /*
             ,userpreferences: {
                 include: true,
@@ -662,7 +661,7 @@ define([
 				position: 3,
 				options: 'config/find'
 			}
-		   ,draw: {
+		,draw: {
 				include: true,
 				id: 'draw',
 				type: 'titlePane',
@@ -735,7 +734,7 @@ define([
 				title: 'Related Records',
 				options: 'config/relatedRecords'
 			}
-
+			*/
 
 
 			,directions: {
@@ -785,7 +784,7 @@ define([
 					}
 				}
 			}
-*/
+
 			,streetview: {
 				include: true,
 				id: 'streetview',
@@ -806,7 +805,7 @@ define([
 				id: 'help',
 				type: 'floating',
 				path: 'gis/dijit/Help',
-				title: 'Okaloosa County Map Viewer',
+				title: 'Help',
 				options: {}
 			}
 

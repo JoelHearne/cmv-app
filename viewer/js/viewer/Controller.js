@@ -7,6 +7,7 @@ define([
 	"dojo/dom-construct",
 	'dojo/on',
 	'dojo/_base/array',
+ //'../gis/dijit/introSplash',
 	'dijit/layout/BorderContainer',
 	'dijit/layout/ContentPane',
 	'gis/dijit/FloatingTitlePane',
@@ -24,9 +25,10 @@ define([
     ,'esri/geometry/Point'
     ,'esri/geometry/Extent'
 
-
 	,'../gis/dijit/mapservLayer'
-], function (Map, dom, domStyle, domGeom, domClass,domConstruct , on, array, BorderContainer, ContentPane, FloatingTitlePane, lang, mapOverlay, FloatingWidgetDialog, put, aspect, has, topic, PopupMobile, InfoWindow,Menu,IdentityManager,Point,Extent,MapservLayer) {
+], function (Map, dom, domStyle, domGeom, domClass,domConstruct , on, array
+ //,introSplash
+, BorderContainer, ContentPane, FloatingTitlePane, lang, mapOverlay, FloatingWidgetDialog, put, aspect, has, topic, PopupMobile, InfoWindow,Menu,IdentityManager,Point,Extent,MapservLayer) {
 
 	return {
 		legendLayerInfos: [],
@@ -48,6 +50,7 @@ define([
 			}
 		},
 		collapseButtons: {},
+
 		startup: function (config) {
 			this.config = config;
 			this.mapClickMode = {
@@ -72,9 +75,50 @@ define([
 			if (config.isDebug) {
 				window.app = this; //dev only
 			}
-		},
+
+            //if (config.showSplashScreen) {
+               // this.showIntroSplash(false, 500, new Date().getTime());
+            //}
+
+		}
+		,showIntroSplash:function(showHelp, duration, appStartTime) {
+/*
+			var showProgress = false;
+			//var showDialog = showHelp || window.userPreferences.showWelcome;
+	        var showDialog =true;
+	       // if (!this.introSplash) {
+				showProgress = true;
+                 this.introSplash = new introSplash({
+                        showAtStartup: true,
+                        showStartupMetrics: true,
+                        appStartTime: appStartTime,
+                        devEmail: "jhearne@co.okaloosa.fl.us"
+                        //,getPermissions: config.getPermissions
+                        //,permissionsFile: config.permissionsFile
+                });
+
+                showDialog = this.introSplash.startup();
+*/
+
+                // Insert a Help title pane for each widget that is included and has a help link
+                /*
+                this.helpNode = this.introSplash.help;
+                var allKeys = functional.keys(config.widgets);
+                var keys = array.filter(allKeys, lang.hitch(this, function(key) {
+                    var widgetCfg = config.widgets[key];
+                    return (widgetCfg.hasOwnProperty('include') && widgetCfg.include && widgetCfg.hasOwnProperty('title'));
+                }));
+                this.numHelp = keys.length;
+                this.addWidgetHelp(keys);
+                */
+
+
+			//}
+
+
+		}
 		// add topics for subscribing and publishing
-		addTopics: function () {
+		,addTopics: function () {
 			// toggle a sidebar pane
 			topic.subscribe('viewer/togglePane', lang.hitch(this, function (args) {
 				this.togglePane(args.pane, args.show);
